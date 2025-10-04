@@ -1,0 +1,70 @@
+version: '3.9'  # Latest stable Docker Compose version
+
+services:
+  # Node.js application service
+  my-app:
+    image: 207567794636.dkr.ecr.eu-central-1.amazonaws.com/my-app:1.0
+    container_name: my-app
+    restart: unless-stopped   # Restart the container automatically unless manually stopped
+    ports:
+      - "3000:3000"          # Expose container port 3000 on host port 3000
+    environment:
+      # MongoDB connection string passed as an environment variable
+      # The app should use process.env.MONGO_URL to connect to MongoDB
+      MONGO_URL: "mongodb://admin:password@mongodb:27017/my-db"
+      NODE_ENV: production   # Set Node environment to production
+    depends_on:
+      # Ensure this container starts only after MongoDB is healthy
+      mongodb:
+        condition: service_healthy
+    networks:
+      - app-network          # Connects to the custom bridge network
+
+  # MongoDB service
+  mongodb:
+    image: mongo:6            # Pin a stable MongoDB version
+    container_name: mongodb
+    restart: unless-stopped    # Restart automatically unless stopped
+    ports:
+      - "27017:27017"         # Expose MongoDB to host (optional if only accessed internally)
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin    # Root username
+      MONGO_INITDB_ROOT_PASSWORD: password # Root password
+    volumes:
+      - mongo-data:/data/db   # Persist database data in a named volume
+    healthcheck:
+      # Ensure MongoDB is ready before dependent services start
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  # Mongo Express service (web UI for MongoDB)
+  mongo-express:
+    image: mongo-express:1.0.0   # Pin a stable version
+    container_name: mongo-express
+    restart: unless-stopped       # Restart automatically unless stopped
+    ports:
+      - "8080:8081"               # Map container port 8081 to host port 8080
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin  # MongoDB admin username
+      ME_CONFIG_MONGODB_ADMINPASSWORD: password # MongoDB admin password
+      ME_CONFIG_MONGODB_SERVER: mongodb       # MongoDB host (uses container name)
+    depends_on:
+      # Wait until MongoDB is healthy
+      mongodb:
+        condition: service_healthy
+    networks:
+      - app-network
+
+# Named volumes (persistent storage for MongoDB)
+volumes:
+  mongo-data:
+    driver: local
+
+# Custom bridge network for inter-container communication
+networks:
+  app-network:
+    driver: bridge
