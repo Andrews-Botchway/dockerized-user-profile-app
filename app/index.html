@@ -71,10 +71,10 @@
 
 <div class="container" id="container">
     <h1>User Profile</h1>
-    <img src="https://via.placeholder.com/328x287" alt="user-profile">
-    <div><span>Name:</span><h3 id="name">Anna Smith</h3></div>
+<img src="images/profile-1.jpg" alt="user-profile">
+    <div><span>Name:</span><h3 id="name">John Cena</h3></div>
     <hr>
-    <div><span>Email:</span><h3 id="email">anna.smith@example.com</h3></div>
+    <div><span>Email:</span><h3 id="email">john.cena@example.com</h3></div>
     <hr>
     <div><span>Interests:</span><h3 id="interests">coding</h3></div>
     <hr>
@@ -84,7 +84,7 @@
 
 <div class="container" id="container-edit">
     <h1>Edit Profile</h1>
-    <img src="https://via.placeholder.com/328x287" alt="user-profile">
+<img src="images/profile-1.jpg" alt="user-profile">
     
     <div>
         <label for="input-name">Name:</label>
@@ -117,8 +117,8 @@ async function init() {
         if (!response.ok) throw new Error('Network response was not ok');
         const user = await response.json();
 
-        document.getElementById('name').textContent = user.name || 'Anna Smith';
-        document.getElementById('email').textContent = user.email || 'anna.smith@example.com';
+        document.getElementById('name').textContent = user.name || 'John Cena';
+        document.getElementById('email').textContent = user.email || 'john.cena@example.com';
         document.getElementById('interests').textContent = user.interests || 'coding';
 
         document.getElementById('container').style.display = 'block';
